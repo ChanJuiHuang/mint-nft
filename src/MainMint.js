@@ -13,24 +13,26 @@ const MainMint = ({ accounts, setAccounts }) => {
   const isConnected = Boolean(accounts[0])
   const toast = useToast()
 
-  // TODO: 呼叫合約 totalSupply 方法，並寫入到變數 totalSupply
   const getNFTTotalSupply = async () => {
-
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const kryptoCampNft = new ethers.Contract(KryptoCampNFTAddress, kryptoCampNFTAbi, provider);
+    let totalSupply = await kryptoCampNft.totalSupply()
+    totalSupply = ethers.utils.formatUnits(totalSupply, 0)
+    setTotalSupply(totalSupply)
   }
 
-  // TODO: 呼叫 Contract mint fn
   const handleMint = async () => {
     if (window.ethereum) {
-      // TODO: 1) 設定 Provider
-
-      // TODO: 2) 設定 signer
-
-      // TODO: 3) new Contract 實體
-
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const kryptoCampNft = new ethers.Contract(KryptoCampNFTAddress, kryptoCampNFTAbi, provider);
+      const accounts = await provider.send("eth_requestAccounts", [])
+      const signer = provider.getSigner()
+      const connectedKryptoCampNft = kryptoCampNft.connect(signer)
+      setAccounts(accounts)
 
       try {
-        // TODO: 4) 呼叫合約 mint 方法
-
+        const tx = await connectedKryptoCampNft.mint(mintAmount, { value: ethers.utils.parseUnits('0.01', 'ether') })
+        console.log(tx)
       } catch ({ error }) {
         showToast(error.message)
         console.error('[Error]', error)
@@ -62,6 +64,10 @@ const MainMint = ({ accounts, setAccounts }) => {
   useEffect(() => {
     getNFTTotalSupply()
   }, [])
+
+  // useEffect(() => {
+  //   setKryptoCampNft(new ethers.Contract(KryptoCampNFTAddress, kryptoCampNFTAbi, provider))
+  // }, [provider])
 
   return (
     <Flex justify="center" align="center" height="100vh" paddingBottom="150px">
